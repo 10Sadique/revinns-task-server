@@ -30,18 +30,53 @@ async function run() {
         app.post('/products', async (req, res) => {
             const product = req.body;
 
-            const query = { porductId: product.porductId };
-            const existingProduct = await productCollection.findOne(query);
+            const query = {
+                productId: product.productId,
+            };
+            const exists = await productCollection.findOne(query);
 
             // If product doesn't exists in db then add product
-            if (!product) {
+            if (!exists) {
                 const result = await productCollection.insertOne(product);
-
                 return res.send(result);
             }
             res.send({
                 acknowledged: false,
             });
+        });
+
+        // Get product by Id
+        app.get('/products/:id', async (req, res) => {
+            let id;
+            if (req.params.id) {
+                id = req.params.id;
+            }
+            const query = {
+                productId: id,
+            };
+            const product = await productCollection.findOne(query);
+
+            res.send(product);
+        });
+        // Get products
+        app.get('/products/', async (req, res) => {
+            const query = {};
+            const product = await productCollection.find(query).toArray();
+
+            res.send(product);
+        });
+
+        // Delete product by Id
+        app.delete('/products/:id', async (req, res) => {
+            let id;
+            if (req.params.id) {
+                id = req.params.id;
+            }
+            const query = {
+                productId: id,
+            };
+            const result = await productCollection.deleteOne(query);
+            res.send(result);
         });
     } finally {
     }
